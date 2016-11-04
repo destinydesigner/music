@@ -82,8 +82,9 @@ class Channel(BaseObject):
         closed_user = []
         logger.debug(self.members)
         for client_id, user in self.members.items():
-            # if client_id == self.owner.client_id:
-            #     continue
+            if client_id == self.owner.client_id:
+                logger.debug("Skip notify master")
+                continue
             try:
                 user.connection.reply(data)
             except iostream.StreamClosedError:

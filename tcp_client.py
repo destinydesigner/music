@@ -60,11 +60,22 @@ class Client(object):
                     b"\n")
                 req = Request(line)
                 if req.cmd == 3:
-                    channel_id = long(req.channel['channel_id'])
+                    channel_id = long(req.channel.channel_id)
                     break
             yield self.stream.write(
                 json.dumps({
                     "cmd": 4, "client_id": client_id, "channel_id": channel_id
+                }) + '\n'
+            )
+
+            yield gen.sleep(10)
+
+            yield self.stream.write(
+                json.dumps({
+                    "cmd": 10,
+                    "channel_id": channel_id,
+                    "song_id": '09ee24cd60e00f1e5b03d96ef6be526b',
+                    "song_play_time": 10000,
                 }) + '\n'
             )
 

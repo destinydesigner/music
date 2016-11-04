@@ -133,7 +133,7 @@ class TogglePlay(Command):
         })
         user.channel.notify_members(self.response)
         package = SyncPackage(channel=user.channel)
-        user.channel.push_to_all(package.data)
+        user.channel.notify_members(package.data)
 
 
 class RetrieveMembers(Command):
@@ -166,7 +166,7 @@ class ChangeSong(Command):
         Channel.update(channel)
 
         package = SyncPackage(channel=channel)
-        channel.push_to_all(package.data)
+        channel.notify_members(package.data)
 
 
 class RetrieveSongs(Command):
