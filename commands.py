@@ -120,10 +120,20 @@ class TogglePlay(Command):
         user = User.get(self.request.client_id)
         if not user.channel:
             raise ChannelDoesNotExist
+        user.channel.notify_members(self.response)
         self.response.update({
             'playing': not self.request.current_playing,
         })
-        user.channel.notify_members(self.response)
+
+
+class RetrieveMembers(Command):
+    cmd_id = 6
+
+    def execute(self):
+        channel = Channel.get(self.request.channel_id)
+        self.response.update({
+            "member_list": channel.get_members(),
+        })
 
 
 class RetrieveSongs(Command):
@@ -166,6 +176,7 @@ COMMAND_MAP = {
     3: CreateChannel,
     4: EnterChannel,
     5: TogglePlay,
+    6: RetrieveMembers,
     11: RetrieveSongs,
     102: SynchronizeTime,
 }

@@ -2,8 +2,16 @@
 # -*- coding: utf-8 -*-
 import json
 import uuid
+import logging
 from tornado import tcpclient, ioloop, gen
 from request import Request
+
+
+logging.basicConfig(
+    filename='client.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+)
 
 
 class Client(object):
@@ -52,10 +60,25 @@ class Client(object):
                 }) + '\n'
             )
 
+            flag = True
             while True:
-                line = yield self.stream.read_until(
-                    b"\n")
-                print line
+                yield self.stream.write(
+                    json.dumps({
+                        "cmd": 5,
+                        "client_id": client_id,
+                        "current_playing": flag,
+                    }) + '\n'
+                )
+                flag = not flag
+                yield gen.sleep(3)
+
+                try:
+                    line = yield self.stream.read_until(
+                        b"\n")
+                    # logging.debug(line.strip())
+                    print line.strip()
+                except:
+                    return
 
     def callback(self, data):
         self.stream.read_until(b"\n", callback=self.callback)

@@ -1,4 +1,5 @@
 import time
+import logging as logger
 from tornado import gen, ioloop, iostream
 from errors import (
     UserDoesNotExist, ChannelDoesNotExist)
@@ -80,14 +81,16 @@ class Channel(BaseObject):
 
     def notify_members(self, data):
         closed_user = []
+        logger.debug(self.members)
         for client_id, user in self.members.items():
-            if client_id == self.owner.client_id:
-                continue
+            # if client_id == self.owner.client_id:
+            #     continue
             try:
                 user.connection.reply(data)
             except iostream.StreamClosedError:
                 user.connection.log('Stream closed')
                 closed_user.append(client_id)
+
         for client_id in closed_user:
             del self.members[client_id]
 
@@ -102,6 +105,7 @@ class Channel(BaseObject):
             except iostream.StreamClosedError:
                 user.connection.log('Stream closed')
                 closed_user.append(client_id)
+
         for client_id in closed_user:
             del self.members[client_id]
 
@@ -154,6 +158,14 @@ class Channel(BaseObject):
                 + (time.time() * 1000
                    - self.server_start_time)
             )
+
+    def get_members(self):
+        result = []
+        for client_id, user in self.members.items():
+            result.append(
+                user.data,
+            )
+        return result
 
 
 class Song(BaseObject):
