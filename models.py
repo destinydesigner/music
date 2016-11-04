@@ -1,3 +1,4 @@
+from tornado import gen, ioloop, iostream
 from errors import (
     UserDoesNotExist, ChannelDoesNotExist)
 
@@ -10,11 +11,13 @@ class User(BaseObject):
     USER_POOL = {}
 
     def __init__(self, client_id=None, user_name=None, icon_id=None,
+                 connection=None,
                  *args, **kwargs):
         self.client_id = client_id
         self.user_name = user_name
         self.icon_id = icon_id
         self.channel = None
+        self.connection = connection
         self.USER_POOL[client_id] = self
 
     @classmethod
@@ -49,7 +52,39 @@ class Channel(BaseObject):
         self.now_playing_song_id = None
         self.song_list = []
         self.owner = owner
+        self.members = {owner.client_id: owner}
         self.CHANNEL_POOL[self.channel_id] = self
+
+    @classmethod
+    def push_channels(cls):
+        for channel_id, channel in cls.CHANNEL_POOL.items():
+            channel.push_to_users()
+        yield gen.sleep(1)
+        ioloop.IOLoop.current().add_future(
+            gen.coroutine(Channel.push_channels)(),
+            lambda f: f.result(),
+        )
+
+    def push_to_users(self):
+        closed_user = []
+        for client_id, user in self.members.items():
+            package = SyncPackage()
+            try:
+                user.connection.reply(
+                    package.data
+                )
+            except iostream.StreamClosedError:
+                user.connection.log('Stream closed')
+                closed_user.append(client_id)
+        for client_id in closed_user:
+            del self.members[client_id]
+
+        if not self.members:
+            del self.CHANNEL_POOL[self.channel_id]
+
+    @staticmethod
+    def push_channels_done(result):
+        yield gen.sleep(1)
 
     @classmethod
     def get(cls, channel_id):
@@ -101,3 +136,19 @@ class Pattern(BaseObject):
 
 class Mode(BaseObject):
     pass
+
+
+class SyncPackage(BaseObject):
+    def __init__(self, pattern=None, *args, **kwargs):
+        self.cmd = 100
+        self.pattern = pattern
+
+    @property
+    def data(self):
+        return {
+            'cmd': self.cmd,
+            'pattern': self.pattern.data if self.pattern else None,
+            'current_mode': 1,
+            'song_play_time': 1,
+            'song_id': '',
+        }

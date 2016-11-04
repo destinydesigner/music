@@ -1,16 +1,16 @@
 from tornado import tcpserver, gen
 from connection import Connection
+from models import Channel
 
 
 class ListenServer(tcpserver.TCPServer):
-    """
     def __init__(self, *args, **kwargs):
         super(ListenServer, self).__init__(*args, **kwargs)
+        print "ListenServer.__init__"
         self.io_loop.add_future(
-            ConnectionPool.instance().push_channels(self.io_loop),
-            ConnectionPool.instance().push_done,
+            gen.coroutine(Channel.push_channels)(),
+            lambda f: f.result(),
         )
-        """
 
     @gen.coroutine
     def handle_stream(self, stream, address):

@@ -5,6 +5,7 @@ from request import Request
 from commands import get_command_class
 from decorators import handle_dispatch_exceptions
 from errors import DataFormatError
+from models import User, Channel
 
 
 class Connection(object):
@@ -13,7 +14,8 @@ class Connection(object):
     def __init__(self, stream):
         super(Connection, self).__init__()
         Connection.count += 1
-        self.client_id = Connection.count
+        self.id = Connection.count
+        self.client_id = None
         self.stream = stream
 
         self.stream.socket.setsockopt(
@@ -25,6 +27,10 @@ class Connection(object):
     @gen.coroutine
     def on_disconnect(self):
         self.log("disconnected")
+        user = User.get(self.client_id)
+        if user.channel:
+            del user.channel.members[self.client_id]
+            del Channel.CHANNEL_POOL[user.channel.channel_id]
         yield []
 
     @gen.coroutine
@@ -54,7 +60,7 @@ class Connection(object):
 
     def log(self, msg):
         print(
-            '[connection %d] %s' % (self.client_id, msg)
+            '[connection %d] %s' % (self.id, msg)
         )
 
     def parse(self, line):

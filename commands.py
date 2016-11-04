@@ -46,10 +46,12 @@ class Register(Command):
                 self.request.client_id,
                 self.request.user_name,
                 self.request.icon_id,
+                self.connection,
             )
             self.response.update({
                 "user": user.data
             })
+            self.connection.client_id = self.request.client_id
 
 
 class RetrieveChannels(Command):
@@ -75,6 +77,7 @@ class CreateChannel(Command):
             channel = Channel(
                 channel_name=self.request.channel_name,
                 owner=user)
+            user.channel = channel
             self.construct_response(channel)
 
     def construct_response(self, channel):
@@ -89,6 +92,9 @@ class EnterChannel(Command):
     def execute(self):
         user = User.get(self.request.client_id)
         if user.channel:
+            if user.channel.channel_id == long(self.request.channel_id):
+                self.construct_response(user.channel)
+                return
             raise PleaseQuitChannel()
 
         channel = Channel.get(self.request.channel_id)
