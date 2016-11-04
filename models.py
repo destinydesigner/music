@@ -238,7 +238,7 @@ class Pattern(BaseObject):
         elif len(units) > number_of_members:
             n = len(units)
             k = number_of_members
-            new_units = [i*n/k for i in range(k)]
+            new_units = [units[i*n/k] for i in range(k)]
             data = self.data.copy()
             data['control_unit_list'] = new_units[:]
             return data

@@ -3,8 +3,8 @@ import time
 from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
-    PleaseQuitChannel, ChannelDoesNotExist, UserIsNotInAnyChannel)
-from models import User, Channel, Song, SyncPackage
+    PleaseQuitChannel, ChannelDoesNotExist, UserIsNotInAnyChannel,)
+from models import User, Channel, Song, SyncPackage, Pattern
 
 
 class Command(object):
@@ -180,6 +180,19 @@ class RetrieveSongs(Command):
         })
 
 
+class RetrievePattern(Command):
+    cmd_id = 12
+
+    def execute(self):
+        pattern = Pattern.get(self.request.mode_id)
+        channel = Channel.get(self.request.channel_id)
+        pattern_data = pattern.get_pattern_data(len(channel.members))
+
+        self.response.update({
+            "pattern": pattern_data,
+        })
+
+
 class SynchronizeTime(Command):
     cmd_id = 102
 
@@ -215,6 +228,7 @@ COMMAND_MAP = {
     7: QuitChannel,
     10: ChangeSong,
     11: RetrieveSongs,
+    12: RetrievePattern,
     102: SynchronizeTime,
 }
 
