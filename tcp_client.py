@@ -27,6 +27,7 @@ class Client(object):
             yield self.stream.write(
                 json.dumps({
                     "cmd": 3, "client_id": client_id, "channel_name": "sf",
+                    "song_play_time": 0,
                 }) + '\n'
             )
             while True:

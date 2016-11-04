@@ -1,3 +1,4 @@
+import time
 from tornado import gen, ioloop, iostream
 from errors import (
     UserDoesNotExist, ChannelDoesNotExist)
@@ -51,21 +52,23 @@ class User(BaseObject):
 class Channel(BaseObject):
     CHANNEL_POOL = {}
 
-    def __init__(self, channel_name=None, owner=None):
+    def __init__(self, channel_name=None, owner=None, song_play_time=None,):
         self.channel_id = id(self)
         self.channel_name = channel_name
         self.now_playing_song_id = None
         self.song_list = []
         self.owner = owner
         self.members = {owner.client_id: owner}
+        self.song_play_time = song_play_time
+        self.server_start_time = time.time() * 1000
         self.CHANNEL_POOL[self.channel_id] = self
 
     @classmethod
     def synchronize_playing(cls):
-        package = SyncPackage()
         for channel_id, channel in cls.CHANNEL_POOL.items():
+            package = SyncPackage(channel=channel)
             channel.push_to_all(package.data)
-        yield gen.sleep(1)
+        yield gen.sleep(10)
         ioloop.IOLoop.current().add_future(
             gen.coroutine(Channel.synchronize_playing)(),
             lambda f: f.result(),
@@ -89,7 +92,6 @@ class Channel(BaseObject):
 
     def push_to_all(self, data):
         closed_user = []
-        print self.members
         for client_id, user in self.members.items():
             try:
                 user.connection.reply(data)
@@ -129,7 +131,16 @@ class Channel(BaseObject):
             'song_list': self.song_list,
             'owner': self.owner.data,
             'number_of_members': len(self.members),
+            'song_play_time': self.get_song_play_time(),
         }
+
+    def get_song_play_time(self):
+        while True:
+            yield int(
+                self.song_play_time
+                + (time.time() * 1000
+                   - self.server_start_time)
+            )
 
 
 class Song(BaseObject):
@@ -165,9 +176,10 @@ class Mode(BaseObject):
 
 
 class SyncPackage(BaseObject):
-    def __init__(self, pattern=None, *args, **kwargs):
+    def __init__(self, channel=None, pattern=None, *args, **kwargs):
         self.cmd = 100
         self.pattern = pattern
+        self.channel = channel
 
     @property
     def data(self):
@@ -175,6 +187,6 @@ class SyncPackage(BaseObject):
             'cmd': self.cmd,
             'pattern': self.pattern.data if self.pattern else None,
             'current_mode': 1,
-            'song_play_time': 1,
+            'song_play_time': self.channel.get_song_play_time(),
             'song_id': '',
         }

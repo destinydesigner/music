@@ -1,4 +1,5 @@
 import json
+import types
 import socket
 from datetime import datetime
 from tornado import gen, iostream
@@ -7,6 +8,13 @@ from commands import get_command_class
 from decorators import handle_dispatch_exceptions
 from errors import DataFormatError
 from models import User, Channel
+
+
+def default_json_serializer(obj):
+    if isinstance(obj, types.GeneratorType):
+        obj = obj.next()
+        return obj
+    raise TypeError(type(obj))
 
 
 class Connection(object):
@@ -101,7 +109,7 @@ class Connection(object):
     @gen.coroutine
     def reply(self, data):
         try:
-            message = json.dumps(data)
+            message = json.dumps(data, default=default_json_serializer)
         except:
             import traceback
             print traceback.format_exc()
