@@ -40,7 +40,12 @@ class User(BaseObject):
             "user_name": self.user_name,
             "client_id": self.client_id,
             "icon_id": self.icon_id,
+            "channel_id": self.channel.channel_id if self.channel else None,
         }
+
+    @classmethod
+    def update(cls, user):
+        cls.USER_POOL[user.client_id] = user
 
 
 class Channel(BaseObject):
@@ -59,15 +64,32 @@ class Channel(BaseObject):
     def synchronize_playing(cls):
         package = SyncPackage()
         for channel_id, channel in cls.CHANNEL_POOL.items():
-            channel.push_to_users(package.data)
+            channel.push_to_all(package.data)
         yield gen.sleep(1)
         ioloop.IOLoop.current().add_future(
             gen.coroutine(Channel.synchronize_playing)(),
             lambda f: f.result(),
         )
 
-    def push_to_users(self, data):
+    def notify_members(self, data):
         closed_user = []
+        for client_id, user in self.members.items():
+            if client_id == self.owner.client_id:
+                continue
+            try:
+                user.connection.reply(data)
+            except iostream.StreamClosedError:
+                user.connection.log('Stream closed')
+                closed_user.append(client_id)
+        for client_id in closed_user:
+            del self.members[client_id]
+
+        if not self.members:
+            del self.CHANNEL_POOL[self.channel_id]
+
+    def push_to_all(self, data):
+        closed_user = []
+        print self.members
         for client_id, user in self.members.items():
             try:
                 user.connection.reply(data)

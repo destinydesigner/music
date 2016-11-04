@@ -1,7 +1,7 @@
 from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
-    PleaseQuitChannel)
+    PleaseQuitChannel, ChannelDoesNotExist)
 from models import User, Channel, Song
 
 
@@ -18,7 +18,6 @@ class Command(object):
         })
 
     def run(self):
-        print "handle cmd %d" % (self.cmd_id)
         self.execute()
         self.reply()
 
@@ -39,6 +38,8 @@ class Register(Command):
     def execute(self):
         try:
             user = User.get(self.request.client_id)
+            user.connection = self.connection
+            User.update(user)
             self.response.update({
                 "user": user.data
             })
@@ -99,12 +100,27 @@ class EnterChannel(Command):
             raise PleaseQuitChannel()
 
         channel = Channel.get(self.request.channel_id)
+        channel.members[user.client_id] = user
         user.channel = channel
+        self.construct_response(user.channel)
 
     def construct_response(self, channel):
         self.response.update({
             'channel': channel.data,
         })
+
+
+class TogglePlay(Command):
+    cmd_id = 5
+
+    def execute(self):
+        user = User.get(self.request.client_id)
+        if not user.channel:
+            raise ChannelDoesNotExist
+        self.response.update({
+            'playing': not self.request.current_playing,
+        })
+        user.channel.notify_members(self.response)
 
 
 class RetrieveSongs(Command):
@@ -146,6 +162,7 @@ COMMAND_MAP = {
     2: RetrieveChannels,
     3: CreateChannel,
     4: EnterChannel,
+    5: TogglePlay,
     11: RetrieveSongs,
     102: SynchronizeTime,
 }

@@ -31,9 +31,32 @@ class Connection(object):
         self.log("disconnected")
         user = User.get(self.client_id)
         if user.channel:
-            del user.channel.members[self.client_id]
-            del Channel.CHANNEL_POOL[user.channel.channel_id]
+            try:
+                del user.channel.members[self.client_id]
+            except:
+                import traceback
+                print traceback.format_exc()
+
+            if user.client_id == user.channel.owner.client_id:
+                try:
+                    del Channel.CHANNEL_POOL[user.channel.channel_id]
+                except:
+                    import traceback
+                    print traceback.format_exc()
+        del User.USER_POOL[user.client_id]
+
         yield []
+
+    @gen.coroutine
+    def on_connect(self):
+        raddr = 'closed'
+        try:
+            raddr = '%s:%d' % self.stream.socket.getpeername()
+        except Exception:
+            pass
+        self.log('new, %s' % raddr)
+
+        yield self.read_data()
 
     @gen.coroutine
     def read_data(self):
@@ -49,17 +72,6 @@ class Connection(object):
                 self.dispatch_cmd(request)
         except iostream.StreamClosedError:
             pass
-
-    @gen.coroutine
-    def on_connect(self):
-        raddr = 'closed'
-        try:
-            raddr = '%s:%d' % self.stream.socket.getpeername()
-        except Exception:
-            pass
-        self.log('new, %s' % raddr)
-
-        yield self.read_data()
 
     def log(self, msg):
         print(
