@@ -2,7 +2,7 @@ from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
     PleaseQuitChannel)
-from models import User, Channel
+from models import User, Channel, Song
 
 
 class Command(object):
@@ -107,6 +107,15 @@ class EnterChannel(Command):
         })
 
 
+class RetrieveSongs(Command):
+    cmd_id = 11
+
+    def execute(self):
+        self.response.update({
+            "song_list": Song.all(),
+        })
+
+
 class SynchronizeTime(Command):
     cmd_id = 102
 
@@ -137,6 +146,7 @@ COMMAND_MAP = {
     2: RetrieveChannels,
     3: CreateChannel,
     4: EnterChannel,
+    11: RetrieveSongs,
     102: SynchronizeTime,
 }
 

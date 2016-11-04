@@ -114,8 +114,13 @@ class Song(BaseObject):
     SONG_POOL = {
     }
 
+    def __init__(self, song_id, url):
+        self.song_id = song_id
+        self.url = url
+
     @classmethod
     def all(cls):
+        cls.SONG_POOL['xxxx'] = Song('xxxx', 'http://google.com')
         result = []
         for song_id, song in cls.SONG_POOL.items():
             result.append(song.data)
