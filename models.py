@@ -111,7 +111,7 @@ class Channel(BaseObject):
     @classmethod
     def get(cls, channel_id):
         try:
-            return cls.CHANNEL_POOL[channel_id]
+            return cls.CHANNEL_POOL[long(channel_id)]
         except:
             raise ChannelDoesNotExist
 
