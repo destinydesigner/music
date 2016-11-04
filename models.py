@@ -219,6 +219,29 @@ class Song(BaseObject):
         }
 
 
+def get_pattern_data(data, number_of_members):
+    units = data['control_unit_list']
+    if len(units) == number_of_members:
+        data = data.copy()
+        return data
+    elif len(units) > number_of_members:
+        n = len(units)
+        k = number_of_members
+        new_units = [units[i*n/k] for i in range(k)]
+        data = data.copy()
+        data['control_unit_list'] = new_units[:]
+        return data
+    else:
+        n = len(units)
+        k = number_of_members
+        new_units = []
+        for i in range(k):
+            new_units.append(units[i % n])
+        data = data.copy()
+        data['control_unit_list'] = new_units[:]
+        return data
+
+
 class Pattern(BaseObject):
     PATTERN_POOL = {}
 
@@ -235,26 +258,7 @@ class Pattern(BaseObject):
             raise PatternDoesNotExist
 
     def get_pattern_data(self, number_of_members):
-        units = self.data['control_unit_list']
-        if len(units) == number_of_members:
-            data = self.data.copy()
-            return data
-        elif len(units) > number_of_members:
-            n = len(units)
-            k = number_of_members
-            new_units = [units[i*n/k] for i in range(k)]
-            data = self.data.copy()
-            data['control_unit_list'] = new_units[:]
-            return data
-        else:
-            n = len(units)
-            k = number_of_members
-            new_units = []
-            for i in range(k):
-                new_units.append(units[i % n])
-            data = self.data.copy()
-            data['control_unit_list'] = new_units[:]
-            return data
+        get_pattern_data(self.data, number_of_members)
 
 
 import patterns

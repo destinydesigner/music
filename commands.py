@@ -4,7 +4,7 @@ from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
     PleaseQuitChannel, ChannelDoesNotExist, UserIsNotInAnyChannel,)
-from models import User, Channel, Song, SyncPackage, Pattern
+from models import User, Channel, Song, SyncPackage, Pattern, get_pattern_data
 
 
 class Command(object):
@@ -129,12 +129,18 @@ class TogglePlay(Command):
         user = User.get(self.request.client_id)
         if not user.channel:
             raise ChannelDoesNotExist
+
+        package = SyncPackage(channel=user.channel)
+
+        self.response.update(package.data)
         self.response.update({
             'playing': not self.request.current_playing,
         })
         user.channel.notify_members(self.response)
-        package = SyncPackage(channel=user.channel)
-        user.channel.notify_members(package.data)
+
+        self.response.update({
+            'cmd': self.cmd_id
+        })
 
 
 class RetrieveMembers(Command):
@@ -163,6 +169,8 @@ class UpdateMode(Command):
     def execute(self):
         channel = Channel.get(self.request.channel_id)
         pattern = self.request.pattern
+
+        pattern = get_pattern_data(pattern, len(channel.members))
 
         package = SyncPackage(channel=channel, pattern=pattern)
         channel.notify_members(package.data, member_index=True)

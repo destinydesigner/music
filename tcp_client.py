@@ -79,7 +79,17 @@ class Client(object):
                 }) + '\n'
             )
 
+            flag = False
             while True:
+                yield gen.sleep(3)
+
+                yield self.stream.write(
+                    json.dumps({
+                        "cmd": 5,
+                        "client_id": client_id,
+                        "current_playing": flag,
+                    }) + '\n'
+                )
                 yield gen.sleep(3)
 
                 yield self.stream.write(
@@ -99,16 +109,6 @@ class Client(object):
                 )
 
             while True:
-                """
-                yield self.stream.write(
-                    json.dumps({
-                        "cmd": 5,
-                        "client_id": client_id,
-                        "current_playing": flag,
-                    }) + '\n'
-                )
-                yield gen.sleep(3)
-                """
 
                 try:
                     line = yield self.stream.read_until(
