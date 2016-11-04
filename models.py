@@ -199,5 +199,5 @@ class SyncPackage(BaseObject):
             'pattern': self.pattern.data if self.pattern else None,
             'current_mode': 1,
             'song_play_time': self.channel.get_song_play_time(),
-            'song_id': '',
+            'song_id': self.channel.now_playing_song_id,
         }
