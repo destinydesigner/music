@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import json
 import uuid
 from tornado import tcpclient, ioloop, gen
@@ -20,14 +22,21 @@ class Client(object):
                 json.dumps({
                     "cmd": 1,
                     "client_id": client_id,
-                    "user_name": "sf",
+                    "user_name": "Fang Guojian",
                     "icon_id": "sf",
                 }) + '\n'
             )
             yield self.stream.write(
                 json.dumps({
-                    "cmd": 3, "client_id": client_id, "channel_name": "sf",
+                    "cmd": 3,
+                    "client_id": client_id,
+                    "channel_name": "模式数据",
                     "song_play_time": 0,
+                    "songs": [
+                        'fcfcf63361d8486b637f0dfb8969f280',
+                        '5f9635394761f94c17599966a9b8d5fb',
+                        '09ee24cd60e00f1e5b03d96ef6be526b',
+                    ]
                 }) + '\n'
             )
             while True:

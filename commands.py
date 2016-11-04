@@ -80,6 +80,7 @@ class CreateChannel(Command):
                 channel_name=self.request.channel_name,
                 owner=user,
                 song_play_time=self.request.song_play_time,
+                songs=self.request.songs,
             )
             user.channel = channel
             self.construct_response(channel)

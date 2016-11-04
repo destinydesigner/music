@@ -52,12 +52,17 @@ class User(BaseObject):
 class Channel(BaseObject):
     CHANNEL_POOL = {}
 
-    def __init__(self, channel_name=None, owner=None, song_play_time=None,):
+    def __init__(self, channel_name=None, owner=None, song_play_time=None,
+                 songs=None):
         self.channel_id = id(self)
         self.channel_name = channel_name
-        self.now_playing_song_id = None
         self.song_list = []
         self.owner = owner
+        self.songs = songs[:]
+        try:
+            self.now_playing_song_id = songs[0]
+        except:
+            self.now_playing_song_id = None
         self.members = {owner.client_id: owner}
         self.song_play_time = song_play_time
         self.server_start_time = time.time() * 1000
@@ -153,7 +158,13 @@ class Song(BaseObject):
 
     @classmethod
     def all(cls):
-        cls.SONG_POOL['xxxx'] = Song('xxxx', 'http://google.com')
+        song_md5 = [
+            'fcfcf63361d8486b637f0dfb8969f280',
+            '5f9635394761f94c17599966a9b8d5fb',
+            '09ee24cd60e00f1e5b03d96ef6be526b',
+        ]
+        for md5 in song_md5:
+            cls.SONG_POOL[md5] = Song(md5, 'http://google.com')
         result = []
         for song_id, song in cls.SONG_POOL.items():
             result.append(song.data)
