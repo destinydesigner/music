@@ -68,7 +68,7 @@ class Client(object):
                 }) + '\n'
             )
 
-            yield gen.sleep(10)
+            yield gen.sleep(3)
 
             yield self.stream.write(
                 json.dumps({
@@ -78,6 +78,25 @@ class Client(object):
                     "song_play_time": 10000,
                 }) + '\n'
             )
+
+            while True:
+                yield gen.sleep(3)
+
+                yield self.stream.write(
+                    json.dumps({
+                        "cmd": 8,
+                        "channel_id": channel_id,
+                        "pattern": {
+                            'member_index': 0,
+                            "control_unit_list": [
+                                {"volumn": 10, "delay": 5},
+                                {"volumn": 10, "delay": 5},
+                                {"volumn": 10, "delay": 5},
+                            ],
+                            'period': 10000,
+                        },
+                    }) + '\n'
+                )
 
             while True:
                 """

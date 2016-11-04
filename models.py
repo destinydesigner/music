@@ -78,13 +78,17 @@ class Channel(BaseObject):
             package = SyncPackage(channel=channel)
             channel.push_to_all(package.data)
 
-    def notify_members(self, data):
+    def notify_members(self, data, member_index=False):
         closed_user = []
         logger.debug(self.members)
+        count = 1
         for client_id, user in self.members.items():
             if client_id == self.owner.client_id:
                 logger.debug("Skip notify master")
                 continue
+            if member_index:
+                data['pattern']['member_index'] = count
+                count += 1
             try:
                 user.connection.reply(data)
             except iostream.StreamClosedError:
@@ -303,7 +307,7 @@ class SyncPackage(BaseObject):
     def data(self):
         return {
             'cmd': self.cmd,
-            'pattern': self.pattern.data if self.pattern else None,
+            'pattern': self.pattern if self.pattern else None,
             'current_mode': 1,
             'song_play_time': self.channel.get_song_play_time(),
             'song_id': self.channel.now_playing_song_id,

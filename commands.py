@@ -111,7 +111,7 @@ class EnterChannel(Command):
         channel = Channel.get(self.request.channel_id)
         logger.debug("Got the channel")
         channel.members[user.client_id] = user
-        logger.debug("Update the memebers of channel.")
+        logger.debug("Update the members of channel.")
         user.channel = channel
         Channel.update(channel)
         self.construct_response(user.channel)
@@ -155,6 +155,17 @@ class QuitChannel(Command):
         if not user.channel:
             raise UserIsNotInAnyChannel
         user.channel.quit(user.client_id)
+
+
+class UpdateMode(Command):
+    cmd_id = 8
+
+    def execute(self):
+        channel = Channel.get(self.request.channel_id)
+        pattern = self.request.pattern
+
+        package = SyncPackage(channel=channel, pattern=pattern)
+        channel.notify_members(package.data, member_index=True)
 
 
 class ChangeSong(Command):
@@ -226,6 +237,7 @@ COMMAND_MAP = {
     5: TogglePlay,
     6: RetrieveMembers,
     7: QuitChannel,
+    8: UpdateMode,
     10: ChangeSong,
     11: RetrieveSongs,
     12: RetrievePattern,
