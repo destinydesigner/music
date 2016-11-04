@@ -11,9 +11,9 @@ class UnsupportedCommandError(BaseException):
     DEFAULT_MESSAGE = "Unsupported command"
 
 
-class UserDoesNotExist(BaseException):
+class DataFormatError(BaseException):
     ERROR = 1
-    DEFAULT_MESSAGE = "User does not exist"
+    DEFAULT_MESSAGE = 'No json object'
 
 
 class ParameterMissing(BaseException):
@@ -23,3 +23,13 @@ class ParameterMissing(BaseException):
     def __init__(self, message=None):
         super(ParameterMissing, self).__init__(message)
         self.message = "Parameter %s is missing." % (message)
+
+
+class UserDoesNotExist(BaseException):
+    ERROR = 100
+    DEFAULT_MESSAGE = "User does not exist"
+
+
+class AlreadyInChannel(BaseException):
+    ERROR = 101
+    DEFAULT_MESSAGE = "This user is already in a channel"

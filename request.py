@@ -1,19 +1,14 @@
 import json
-from errors import ParameterMissing
+from errors import ParameterMissing, DataFormatError
 
 
 class Request(object):
     def __init__(self, data):
-        try:
-            self.data = json.loads(data)
-            if not isinstance(self.data, dict):
-                raise Exception("Please send a json object.")
-        except Exception as e:
-            self.data = {
-                'cmd': -1,
-                'error': -1,
-                'message': str(e),
-            }
+        if not data:
+            raise DataFormatError
+        self.data = json.loads(data)
+        if not isinstance(self.data, dict):
+            raise DataFormatError
 
     def __getattr__(self, key):
         try:
