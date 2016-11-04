@@ -56,7 +56,6 @@ class Channel(BaseObject):
                  songs=None):
         self.channel_id = id(self)
         self.channel_name = channel_name
-        self.song_list = []
         self.owner = owner
         self.songs = songs[:]
         try:
@@ -133,7 +132,7 @@ class Channel(BaseObject):
             'channel_id': self.channel_id,
             'channel_name': self.channel_name,
             'now_playing_song_id': self.now_playing_song_id,
-            'song_list': self.song_list,
+            'song_list': self.songs,
             'owner': self.owner.data,
             'number_of_members': len(self.members),
             'song_play_time': self.get_song_play_time(),
