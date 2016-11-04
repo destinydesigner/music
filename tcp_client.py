@@ -41,7 +41,7 @@ class Client(object):
                     "channel": {
                         "channel_name": "模式数据",
                         "song_play_time": 0,
-                        "songs": [
+                        "song_list": [
                             {
                                 "song_id": 'fcfcf63361d8486b637f0dfb8969f280',
                             },

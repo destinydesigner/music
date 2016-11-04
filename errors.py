@@ -48,3 +48,8 @@ class ChannelDoesNotExist(BaseException):
 class UserIsNotInAnyChannel(BaseException):
     ERROR = 104
     DEFAULT_MESSAGE = "User is not in any channel"
+
+
+class PatternDoesNotExist(BaseException):
+    ERROR = 105
+    DEFAULT_MESSAGE = "Pattern does not exist"

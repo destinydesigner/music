@@ -2,7 +2,7 @@ import time
 import logging as logger
 from tornado import gen, iostream
 from errors import (
-    UserDoesNotExist, ChannelDoesNotExist)
+    UserDoesNotExist, ChannelDoesNotExist, PatternDoesNotExist)
 
 
 class BaseObject(object):
@@ -154,7 +154,11 @@ class Channel(BaseObject):
             'owner': self.owner.data,
             'number_of_members': len(self.members),
             'song_play_time': self.get_song_play_time(),
+            'modes': self.get_modes(),
         }
+
+    def get_modes(self):
+        return Mode.all()
 
     def get_songs(self):
         result = []
@@ -183,8 +187,7 @@ class Channel(BaseObject):
 
 
 class Song(BaseObject):
-    SONG_POOL = {
-    }
+    SONG_POOL = {}
 
     def __init__(self, song_id, url):
         self.song_id = song_id
@@ -213,11 +216,81 @@ class Song(BaseObject):
 
 
 class Pattern(BaseObject):
-    pass
+    PATTERN_POOL = {}
+
+    def __init__(self, mode_id, data):
+        self.mode_id = mode_id
+        self.data = data
+        self.PATTERN_POOL[mode_id] = self
+
+    @classmethod
+    def get(cls, mode_id):
+        try:
+            return cls.PATTERN_POOL[mode_id]
+        except:
+            raise PatternDoesNotExist
+
+    def get_pattern_data(self, number_of_members):
+        units = self.data['control_unit_list']
+        if len(units) == number_of_members:
+            data = self.data.copy()
+            return data
+        elif len(units) > number_of_members:
+            n = len(units)
+            k = number_of_members
+            new_units = [i*n/k for i in range(k)]
+            data = self.data.copy()
+            data['control_unit_list'] = new_units[:]
+            return data
+        else:
+            n = len(units)
+            k = number_of_members
+            new_units = []
+            for i in range(k):
+                new_units.append(units[i % n])
+            data = self.data.copy()
+            data['control_unit_list'] = new_units[:]
+            return data
+
+
+import patterns
+for i, data in patterns.PATTERNS.items():
+    Pattern(i, data)
 
 
 class Mode(BaseObject):
-    pass
+    MODE_POOL = {}
+
+    def __init__(self, mode_id=None, name=None, icon=None):
+        self.mode_id = mode_id
+        self.name = name
+        self.icon = icon
+
+    @classmethod
+    def all(cls):
+        modes = [
+            (1, 'Classic', ''),
+            (2, 'POP    ', ''),
+            (3, 'Blue   ', ''),
+        ]
+        for i, name, icon in modes:
+            cls.MODE_POOL[i] = Mode(
+                mode_id=i,
+                name=name.strip(),
+                icon=icon,
+            )
+        result = []
+        for mode_id, mode in cls.MODE_POOL.items():
+            result.append(mode.data)
+        return result
+
+    @property
+    def data(self):
+        return {
+            'name': self.name,
+            'mode_id': self.mode_id,
+            'icon': self.icon
+        }
 
 
 class SyncPackage(BaseObject):

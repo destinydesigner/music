@@ -25,7 +25,7 @@ class Request(object):
             if key == 'channel':
                 logger.debug(type(val))
                 return Request(val)
-            if key == 'songs':
+            if key == 'song_list':
                 return [Request(s) for s in val]
             return val
         except Exception as e:
