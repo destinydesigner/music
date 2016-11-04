@@ -60,7 +60,7 @@ class Channel(BaseObject):
         self.owner = owner
         self.songs = songs[:]
         try:
-            self.now_playing_song_id = songs[0]
+            self.now_playing_song_id = songs[0].song_id
         except:
             self.now_playing_song_id = None
         self.members = {owner.client_id: owner}
@@ -159,7 +159,7 @@ class Channel(BaseObject):
         result = []
         for song in self.songs:
             result.append({
-                'song_id': song,
+                'song_id': song.song_id,
                 'url': '',
             })
         return result
