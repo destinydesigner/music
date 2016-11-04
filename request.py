@@ -1,4 +1,5 @@
 import json
+from errors import ParameterMissing
 
 
 class Request(object):
@@ -13,7 +14,9 @@ class Request(object):
                 'error': -1,
                 'message': str(e),
             }
-            self.response = self.data
 
     def __getattr__(self, key):
-        return self.data[key]
+        try:
+            return self.data[key]
+        except Exception as e:
+            raise ParameterMissing(str(e))

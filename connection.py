@@ -3,7 +3,7 @@ import socket
 from tornado import gen, iostream
 from request import Request
 from commands import get_command_class
-from errors import UnsupportedCommandError
+from decorators import handle_dispatch_exceptions
 
 
 class Connection(object):
@@ -53,17 +53,9 @@ class Connection(object):
             '[connection %d] %s' % (self.client_id, msg)
         )
 
+    @handle_dispatch_exceptions
     def dispatch_cmd(self, request):
-        try:
-            klass = get_command_class(request.cmd)
-        except UnsupportedCommandError:
-            self.reply({
-                "cmd": -1,
-                "error": -1,
-                "message": "Unsupported command",
-            })
-            return
-
+        klass = get_command_class(request.cmd)
         handler = klass(self, request)
         handler.run()
 
