@@ -1,3 +1,4 @@
+import logging as logger
 from tornado import tcpserver, gen
 from connection import Connection
 from models import Channel
@@ -6,7 +7,7 @@ from models import Channel
 class ListenServer(tcpserver.TCPServer):
     def __init__(self, *args, **kwargs):
         super(ListenServer, self).__init__(*args, **kwargs)
-        print "ListenServer.__init__"
+        logger.info("ListenServer.__init__")
         self.io_loop.add_future(
             gen.coroutine(Channel.synchronize_playing)(),
             lambda f: f.result(),

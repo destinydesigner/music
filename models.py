@@ -1,6 +1,6 @@
 import time
 import logging as logger
-from tornado import gen, ioloop, iostream
+from tornado import gen, iostream
 from errors import (
     UserDoesNotExist, ChannelDoesNotExist)
 
@@ -69,15 +69,14 @@ class Channel(BaseObject):
         self.CHANNEL_POOL[self.channel_id] = self
 
     @classmethod
+    def update(cls, channel):
+        cls.CHANNEL_POOL[channel.channel_id] = channel
+
+    @classmethod
     def synchronize_playing(cls):
         for channel_id, channel in cls.CHANNEL_POOL.items():
             package = SyncPackage(channel=channel)
             channel.push_to_all(package.data)
-        yield gen.sleep(10)
-        ioloop.IOLoop.current().add_future(
-            gen.coroutine(Channel.synchronize_playing)(),
-            lambda f: f.result(),
-        )
 
     def notify_members(self, data):
         closed_user = []
@@ -122,6 +121,20 @@ class Channel(BaseObject):
             return cls.CHANNEL_POOL[long(channel_id)]
         except:
             raise ChannelDoesNotExist
+
+    def quit(self, client_id):
+        try:
+            del self.members[client_id]
+        except:
+            import traceback
+            print traceback.format_exc()
+
+        if client_id == self.owner.client_id:
+            try:
+                del Channel.CHANNEL_POOL[self.channel_id]
+            except:
+                import traceback
+                print traceback.format_exc()
 
     @classmethod
     def all(cls):

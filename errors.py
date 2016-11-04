@@ -43,3 +43,8 @@ class PleaseQuitChannel(BaseException):
 class ChannelDoesNotExist(BaseException):
     ERROR = 103
     DEFAULT_MESSAGE = "Channel does not exist"
+
+
+class UserIsNotInAnyChannel(BaseException):
+    ERROR = 104
+    DEFAULT_MESSAGE = "User is not in any channel"

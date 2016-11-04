@@ -1,8 +1,9 @@
+import logging as logger
 from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
-    PleaseQuitChannel, ChannelDoesNotExist)
-from models import User, Channel, Song
+    PleaseQuitChannel, ChannelDoesNotExist, UserIsNotInAnyChannel)
+from models import User, Channel, Song, SyncPackage
 
 
 class Command(object):
@@ -76,6 +77,7 @@ class CreateChannel(Command):
             else:
                 raise AlreadyInChannel()
         else:
+            logger.info("Create new Channel")
             channel = Channel(
                 channel_name=self.request.channel_name,
                 owner=user,
@@ -96,15 +98,21 @@ class EnterChannel(Command):
 
     def execute(self):
         user = User.get(self.request.client_id)
+
         if user.channel:
             if user.channel.channel_id == long(self.request.channel_id):
+                logger.debug("User already in this channel")
                 self.construct_response(user.channel)
                 return
+            logger.debug("User in another channel, please quit first")
             raise PleaseQuitChannel()
 
         channel = Channel.get(self.request.channel_id)
+        logger.debug("Got the channel")
         channel.members[user.client_id] = user
+        logger.debug("Update the memebers of channel.")
         user.channel = channel
+        Channel.update(channel)
         self.construct_response(user.channel)
 
     def construct_response(self, channel):
@@ -120,10 +128,12 @@ class TogglePlay(Command):
         user = User.get(self.request.client_id)
         if not user.channel:
             raise ChannelDoesNotExist
-        user.channel.notify_members(self.response)
         self.response.update({
             'playing': not self.request.current_playing,
         })
+        user.channel.notify_members(self.response)
+        package = SyncPackage(channel=user.channel)
+        user.channel.push_to_all(package.data)
 
 
 class RetrieveMembers(Command):
@@ -134,6 +144,16 @@ class RetrieveMembers(Command):
         self.response.update({
             "member_list": channel.get_members(),
         })
+
+
+class QuitChannel(Command):
+    cmd_id = 7
+
+    def execute(self):
+        user = User.get(self.request.client_id)
+        if not user.channel:
+            raise UserIsNotInAnyChannel
+        user.channel.quit(user.client_id)
 
 
 class RetrieveSongs(Command):
@@ -177,6 +197,7 @@ COMMAND_MAP = {
     4: EnterChannel,
     5: TogglePlay,
     6: RetrieveMembers,
+    7: QuitChannel,
     11: RetrieveSongs,
     102: SynchronizeTime,
 }
@@ -185,4 +206,5 @@ COMMAND_MAP = {
 def get_command_class(cmd_id):
     if cmd_id not in COMMAND_MAP:
         raise UnsupportedCommandError()
+    logger.debug('Found cmd. Cmd: %d', cmd_id)
     return COMMAND_MAP[cmd_id]

@@ -1,7 +1,7 @@
 import json
 import types
 import socket
-import logging as tlog
+import logging as logger
 from datetime import datetime
 from tornado import gen, iostream
 from request import Request
@@ -77,13 +77,15 @@ class Connection(object):
                 try:
                     request = self.parse(line.strip())
                 except:
+                    import traceback
+                    logger.error(traceback.format_exc())
                     continue
                 self.dispatch_cmd(request)
         except iostream.StreamClosedError:
             pass
 
     def log(self, msg):
-        tlog.debug(
+        logger.debug(
             '[connection %d] %s' % (self.id, msg)
         )
 

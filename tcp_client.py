@@ -60,8 +60,9 @@ class Client(object):
                 }) + '\n'
             )
 
-            flag = True
+            flag = False
             while True:
+                """
                 yield self.stream.write(
                     json.dumps({
                         "cmd": 5,
@@ -69,8 +70,8 @@ class Client(object):
                         "current_playing": flag,
                     }) + '\n'
                 )
-                flag = not flag
                 yield gen.sleep(3)
+                """
 
                 try:
                     line = yield self.stream.read_until(
