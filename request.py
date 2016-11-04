@@ -12,6 +12,9 @@ class Request(object):
 
     def __getattr__(self, key):
         try:
-            return self.data[key]
+            val = self.data[key]
+            if key == 'channel_id':
+                return long(val)
+            return val
         except Exception as e:
             raise ParameterMissing(str(e))
