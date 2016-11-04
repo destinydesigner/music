@@ -187,7 +187,11 @@ class ChangeSong(Command):
         Channel.update(channel)
 
         package = SyncPackage(channel=channel)
-        channel.notify_members(package.data)
+        data = package.data.copy()
+        data.update({
+            'playing': True
+        })
+        channel.notify_members(data)
 
 
 class RetrieveSongs(Command):
