@@ -1,4 +1,5 @@
 import logging as logger
+import time
 from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
@@ -163,6 +164,7 @@ class ChangeSong(Command):
         channel = Channel.get(self.request.channel_id)
         channel.now_playing_song_id = self.request.song_id
         channel.song_play_time = self.request.song_play_time
+        channel.server_start_time = int(time.time() * 1000)
         Channel.update(channel)
 
         package = SyncPackage(channel=channel)
