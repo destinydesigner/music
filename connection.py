@@ -32,7 +32,7 @@ class Connection(object):
         try:
             while True:
                 line = yield self.stream.read_until(b'\n')
-                self.log('got |%s|' % line.decode('utf-8').strip())
+                self.log('got <= |%s|' % line.decode('utf-8').strip())
                 try:
                     request = self.parse(line.strip())
                 except:
@@ -85,4 +85,5 @@ class Connection(object):
             import traceback
             print traceback.format_exc()
             message = data
+        self.log('put => |%s|' % message)
         yield self.stream.write(message + '\n')
