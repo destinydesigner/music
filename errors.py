@@ -33,3 +33,13 @@ class UserDoesNotExist(BaseException):
 class AlreadyInChannel(BaseException):
     ERROR = 101
     DEFAULT_MESSAGE = "This user is already in a channel"
+
+
+class PleaseQuitChannel(BaseException):
+    ERROR = 102
+    DEFAULT_MESSAGE = "Please quit channel first."
+
+
+class ChannelDoesNotExist(BaseException):
+    ERROR = 103
+    DEFAULT_MESSAGE = "Channel does not exist"

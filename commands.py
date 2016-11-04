@@ -1,5 +1,6 @@
 from errors import (
-    UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel)
+    UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
+    PleaseQuitChannel)
 from models import User, Channel
 
 
@@ -82,6 +83,23 @@ class CreateChannel(Command):
         })
 
 
+class EnterChannel(Command):
+    cmd_id = 4
+
+    def execute(self):
+        user = User.get(self.request.client_id)
+        if user.channel:
+            raise PleaseQuitChannel()
+
+        channel = Channel.get(self.request.channel_id)
+        user.channel = channel
+
+    def construct_response(self, channel):
+        self.response.update({
+            'channel': channel.data,
+        })
+
+
 class SystemDumpUser(Command):
     cmd_id = -2
 
@@ -97,6 +115,7 @@ COMMAND_MAP = {
     1: Register,
     2: RetrieveChannels,
     3: CreateChannel,
+    4: EnterChannel,
 }
 
 

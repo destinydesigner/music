@@ -1,4 +1,5 @@
-from errors import UserDoesNotExist
+from errors import (
+    UserDoesNotExist, ChannelDoesNotExist)
 
 
 class BaseObject(object):
@@ -51,6 +52,13 @@ class Channel(BaseObject):
         self.CHANNEL_POOL[self.channel_id] = self
 
     @classmethod
+    def get(cls, channel_id):
+        try:
+            return cls.CHANNEL_POOL[channel_id]
+        except:
+            raise ChannelDoesNotExist
+
+    @classmethod
     def all(cls):
         result = []
         for channel_id, channel in cls.CHANNEL_POOL.items():
@@ -65,6 +73,25 @@ class Channel(BaseObject):
             'now_playing_song_id': self.now_playing_song_id,
             'song_list': self.song_list,
             'owner': self.owner.data,
+        }
+
+
+class Song(BaseObject):
+    SONG_POOL = {
+    }
+
+    @classmethod
+    def all(cls):
+        result = []
+        for song_id, song in cls.SONG_POOL.items():
+            result.append(song.data)
+        return result
+
+    @property
+    def data(self):
+        return {
+            'song_id': self.song_id,
+            'url': self.url,
         }
 
 
