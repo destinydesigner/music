@@ -130,14 +130,13 @@ class TogglePlay(Command):
         if not user.channel:
             raise ChannelDoesNotExist
 
+        # toggle
+        user.channel.playing = not user.channel.playing
+
         package = SyncPackage(channel=user.channel)
+        user.channel.notify_members(package.data)
 
         self.response.update(package.data)
-        self.response.update({
-            'playing': not self.request.current_playing,
-        })
-        user.channel.notify_members(self.response)
-
         self.response.update({
             'cmd': self.cmd_id
         })
@@ -184,14 +183,11 @@ class ChangeSong(Command):
         channel.now_playing_song_id = self.request.song_id
         channel.song_play_time = self.request.song_play_time
         channel.server_start_time = int(time.time() * 1000)
+        channel.playing = True
         Channel.update(channel)
 
         package = SyncPackage(channel=channel)
-        data = package.data.copy()
-        data.update({
-            'playing': True
-        })
-        channel.notify_members(data)
+        channel.notify_members(package.data)
 
 
 class RetrieveSongs(Command):
