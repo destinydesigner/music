@@ -79,10 +79,10 @@ class CreateChannel(Command):
         else:
             logger.info("Create new Channel")
             channel = Channel(
-                channel_name=self.request.channel_name,
+                channel_name=self.request.channel.channel_name,
                 owner=user,
-                song_play_time=self.request.song_play_time,
-                songs=self.request.songs,
+                song_play_time=self.request.channel.song_play_time,
+                songs=self.request.channel.songs,
             )
             user.channel = channel
             self.construct_response(channel)
@@ -156,6 +156,19 @@ class QuitChannel(Command):
         user.channel.quit(user.client_id)
 
 
+class ChangeSong(Command):
+    cmd_id = 10
+
+    def execute(self):
+        channel = Channel.get(self.request.channel_id)
+        channel.now_playing_song_id = self.request.song_id
+        channel.song_play_time = self.request.song_play_time
+        Channel.update(channel)
+
+        package = SyncPackage(channel=channel)
+        channel.push_to_all(package.data)
+
+
 class RetrieveSongs(Command):
     cmd_id = 11
 
@@ -198,6 +211,7 @@ COMMAND_MAP = {
     5: TogglePlay,
     6: RetrieveMembers,
     7: QuitChannel,
+    10: ChangeSong,
     11: RetrieveSongs,
     102: SynchronizeTime,
 }
