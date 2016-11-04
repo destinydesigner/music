@@ -132,11 +132,20 @@ class Channel(BaseObject):
             'channel_id': self.channel_id,
             'channel_name': self.channel_name,
             'now_playing_song_id': self.now_playing_song_id,
-            'song_list': self.songs,
+            'song_list': self.get_songs(),
             'owner': self.owner.data,
             'number_of_members': len(self.members),
             'song_play_time': self.get_song_play_time(),
         }
+
+    def get_songs(self):
+        result = []
+        for song in self.songs:
+            result.append({
+                'song_id': song,
+                'url': '',
+            })
+        return result
 
     def get_song_play_time(self):
         while True:

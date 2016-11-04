@@ -1,5 +1,9 @@
+import logging
 import tornado.ioloop
 from listen_server import ListenServer
+
+
+logging.basicConfig(filename='example.log', level=logging.DEBUG)
 
 
 def main():

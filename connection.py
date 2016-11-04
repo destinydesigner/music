@@ -1,6 +1,7 @@
 import json
 import types
 import socket
+import logging as tlog
 from datetime import datetime
 from tornado import gen, iostream
 from request import Request
@@ -82,7 +83,7 @@ class Connection(object):
             pass
 
     def log(self, msg):
-        print(
+        tlog.debug(
             '[connection %d] %s' % (self.id, msg)
         )
 
