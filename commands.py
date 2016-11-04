@@ -1,4 +1,3 @@
-from tornado import gen
 from errors import UnsupportedCommandError
 
 
@@ -9,21 +8,31 @@ class Command(object):
         self.connection = connection
         self.request = request
 
-
-class Register(Command):
-    cmd_id = 1
-
     def run(self):
         print "handle cmd %d" % (self.cmd_id)
         self.reply()
 
-    @gen.coroutine
+
+class Output(Command):
+    cmd_id = -1
+
     def reply(self):
-        yield self.connection.reply(
-            'success, cmd %d' % (self.cmd_id))
+        self.connection.reply(self.request.response)
+
+
+class Register(Command):
+    cmd_id = 1
+
+    def reply(self):
+        self.connection.reply({
+            'cmd': self.request.cmd,
+            'error': 0,
+            'message': 'success, cmd %d' % (self.cmd_id)
+        })
 
 
 COMMAND_MAP = {
+    -1: Output,
     1: Register,
 }
 

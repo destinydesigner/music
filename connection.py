@@ -32,7 +32,7 @@ class Connection(object):
             while True:
                 line = yield self.stream.read_until(b'\n')
                 self.log('got |%s|' % line.decode('utf-8').strip())
-                req = Request(json.loads(line))
+                req = Request(line)
                 self.dispatch_cmd(req)
         except iostream.StreamClosedError:
             pass
@@ -57,12 +57,20 @@ class Connection(object):
         try:
             klass = get_command_class(request.cmd)
         except UnsupportedCommandError:
-            self.reply("Unsupported command")
+            self.reply({
+                "cmd": -1,
+                "error": -1,
+                "message": "Unsupported command",
+            })
             return
 
         handler = klass(self, request)
         handler.run()
 
     @gen.coroutine
-    def reply(self, message):
+    def reply(self, data):
+        try:
+            message = json.dumps(data)
+        except:
+            message = data
         yield self.stream.write(message + '\n')
