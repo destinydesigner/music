@@ -160,6 +160,8 @@ class QuitChannel(Command):
         if not user.channel:
             raise UserIsNotInAnyChannel
         user.channel.quit(user.client_id)
+        user.channel = None
+        User.update(user)
 
 
 class UpdateMode(Command):
