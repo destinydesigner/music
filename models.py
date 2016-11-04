@@ -108,6 +108,7 @@ class Channel(BaseObject):
             'now_playing_song_id': self.now_playing_song_id,
             'song_list': self.song_list,
             'owner': self.owner.data,
+            'number_of_members': len(self.members),
         }
 
 
