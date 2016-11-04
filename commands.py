@@ -1,3 +1,4 @@
+from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
     PleaseQuitChannel)
@@ -7,7 +8,7 @@ from models import User, Channel
 class Command(object):
     cmd_id = None
 
-    def __init__(self, connection, request):
+    def __init__(self, connection, request, *args, **kwargs):
         self.connection = connection
         self.request = request
         self.response = request.data.copy()
@@ -106,6 +107,20 @@ class EnterChannel(Command):
         })
 
 
+class SynchronizeTime(Command):
+    cmd_id = 102
+
+    def __init__(self, connection, request, start_time, *args, **kwargs):
+        super(SynchronizeTime, self).__init__(connection, request)
+        self.start_time = start_time
+
+    def execute(self):
+        self.response.update({
+            'server_processing_time': (
+                datetime.now() - self.start_time).microseconds,
+        })
+
+
 class SystemDumpUser(Command):
     cmd_id = -2
 
@@ -122,6 +137,7 @@ COMMAND_MAP = {
     2: RetrieveChannels,
     3: CreateChannel,
     4: EnterChannel,
+    102: SynchronizeTime,
 }
 
 

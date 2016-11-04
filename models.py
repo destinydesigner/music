@@ -56,23 +56,21 @@ class Channel(BaseObject):
         self.CHANNEL_POOL[self.channel_id] = self
 
     @classmethod
-    def push_channels(cls):
+    def synchronize_playing(cls):
+        package = SyncPackage()
         for channel_id, channel in cls.CHANNEL_POOL.items():
-            channel.push_to_users()
+            channel.push_to_users(package.data)
         yield gen.sleep(1)
         ioloop.IOLoop.current().add_future(
-            gen.coroutine(Channel.push_channels)(),
+            gen.coroutine(Channel.synchronize_playing)(),
             lambda f: f.result(),
         )
 
-    def push_to_users(self):
+    def push_to_users(self, data):
         closed_user = []
         for client_id, user in self.members.items():
-            package = SyncPackage()
             try:
-                user.connection.reply(
-                    package.data
-                )
+                user.connection.reply(data)
             except iostream.StreamClosedError:
                 user.connection.log('Stream closed')
                 closed_user.append(client_id)

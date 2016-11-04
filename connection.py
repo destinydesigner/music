@@ -1,5 +1,6 @@
 import json
 import socket
+from datetime import datetime
 from tornado import gen, iostream
 from request import Request
 from commands import get_command_class
@@ -17,6 +18,7 @@ class Connection(object):
         self.id = Connection.count
         self.client_id = None
         self.stream = stream
+        self.start_time = None
 
         self.stream.socket.setsockopt(
             socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -38,6 +40,7 @@ class Connection(object):
         try:
             while True:
                 line = yield self.stream.read_until(b'\n')
+                self.start_time = datetime.now()
                 self.log('got <= |%s|' % line.decode('utf-8').strip())
                 try:
                     request = self.parse(line.strip())
@@ -80,7 +83,7 @@ class Connection(object):
     @handle_dispatch_exceptions
     def dispatch_cmd(self, request):
         klass = get_command_class(request.cmd)
-        handler = klass(self, request)
+        handler = klass(self, request, self.start_time)
         handler.run()
 
     @gen.coroutine

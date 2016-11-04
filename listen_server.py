@@ -8,7 +8,7 @@ class ListenServer(tcpserver.TCPServer):
         super(ListenServer, self).__init__(*args, **kwargs)
         print "ListenServer.__init__"
         self.io_loop.add_future(
-            gen.coroutine(Channel.push_channels)(),
+            gen.coroutine(Channel.synchronize_playing)(),
             lambda f: f.result(),
         )
 
