@@ -132,6 +132,9 @@ class TogglePlay(Command):
 
         # toggle
         user.channel.playing = not user.channel.playing
+        if user.channel.playing is True:
+            user.channel.server_start_time = int(time.time() * 1000)
+            user.channel.song_play_time = self.request.song_play_time
 
         package = SyncPackage(channel=user.channel)
         user.channel.notify_members(package.data)
