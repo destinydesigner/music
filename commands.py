@@ -136,7 +136,7 @@ class TogglePlay(Command):
             user.channel.song_play_time = self.request.song_play_time
 
         package = SyncPackage(channel=user.channel)
-        user.channel.notify_members(package.data)
+        user.channel.push_to_all(package.data)
 
         self.response.update(package.data)
         self.response.update({
@@ -176,7 +176,7 @@ class UpdateMode(Command):
         pattern = get_pattern_data(pattern, len(channel.members))
 
         package = SyncPackage(channel=channel, pattern=pattern)
-        channel.notify_members(package.data, member_index=True)
+        channel.push_to_all(package.data, member_index=True)
 
 
 class ChangeSong(Command):
@@ -191,7 +191,7 @@ class ChangeSong(Command):
         Channel.update(channel)
 
         package = SyncPackage(channel=channel)
-        channel.notify_members(package.data)
+        channel.push_to_all(package.data)
         self.response.update(package.data)
         self.response.update({
             'cmd': self.cmd_id

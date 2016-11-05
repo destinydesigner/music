@@ -102,7 +102,7 @@ class Channel(BaseObject):
         if not self.members:
             del self.CHANNEL_POOL[self.channel_id]
 
-    def push_to_all(self, data):
+    def push_to_all(self, data, member_index=False):
         closed_user = []
         for client_id, user in self.members.items():
             try:
