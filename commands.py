@@ -1,6 +1,5 @@
 import logging as logger
 import time
-from datetime import datetime
 from errors import (
     UnsupportedCommandError, UserDoesNotExist, AlreadyInChannel,
     PleaseQuitChannel, ChannelDoesNotExist, UserIsNotInAnyChannel,)
@@ -227,7 +226,7 @@ class SynchronizeTime(Command):
     def execute(self):
         self.response.update({
             'server_processing_time': (
-                datetime.now() - self.start_time).microseconds,
+                time.time() * 1000 - self.start_time * 1000),
         })
 
 

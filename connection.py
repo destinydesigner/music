@@ -2,7 +2,7 @@ import json
 import types
 import socket
 import logging as logger
-from datetime import datetime
+import time
 from tornado import gen, iostream
 from request import Request
 from commands import get_command_class
@@ -72,7 +72,7 @@ class Connection(object):
         try:
             while True:
                 line = yield self.stream.read_until(b'\n')
-                self.start_time = datetime.now()
+                self.start_time = time.time()
                 self.log('got <= |%s|' % line.decode('utf-8').strip())
                 try:
                     request = self.parse(line.strip())
