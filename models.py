@@ -105,7 +105,12 @@ class Channel(BaseObject):
 
     def push_to_all(self, data, member_index=False):
         closed_user = []
+        count = 1
         for client_id, user in self.members.items():
+            if member_index:
+                data['pattern']['member_index'] = count
+                count += 1
+
             try:
                 user.connection.reply(data)
             except iostream.StreamClosedError:
