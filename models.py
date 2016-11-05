@@ -226,6 +226,8 @@ class Song(BaseObject):
             'fcfcf63361d8486b637f0dfb8969f280',
             '5f9635394761f94c17599966a9b8d5fb',
             '09ee24cd60e00f1e5b03d96ef6be526b',
+            '749f5eb9dec66979027a7c9646ec2020',
+            '4ed3b38a8c74ab49d73cba322d0f1689',
         ]
         for md5 in song_md5:
             cls.SONG_POOL[md5] = Song(md5, 'http://google.com')
