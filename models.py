@@ -109,7 +109,7 @@ class Channel(BaseObject):
             try:
                 user.connection.reply(data)
             except iostream.StreamClosedError:
-                user.connection.log('Stream closed')
+                logger.error('Stream closed')
                 closed_user.append(client_id)
 
         for client_id in closed_user:
@@ -129,19 +129,19 @@ class Channel(BaseObject):
         except:
             raise ChannelDoesNotExist
 
-    def quit(self, client_id):
-        try:
-            del self.members[client_id]
-        except:
-            import traceback
-            print traceback.format_exc()
-
+    def user_quit(self, client_id):
         logger.debug(
             "Quit. ClientId: %s, OwnerClientId: %s"
             " type(ClientId): %s, type(OwnerClientId): %s",
             client_id, self.owner.client_id,
             type(client_id), type(self.owner.client_id)
         )
+
+        try:
+            del self.members[client_id]
+        except:
+            import traceback
+            print traceback.format_exc()
 
         if client_id == self.owner.client_id:
             try:

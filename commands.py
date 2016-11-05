@@ -158,12 +158,15 @@ class QuitChannel(Command):
     cmd_id = 7
 
     def execute(self):
+        logger.debug("QuitChannel begin")
         user = User.get(self.request.client_id)
         if not user.channel:
             raise UserIsNotInAnyChannel
-        user.channel.quit(user.client_id)
+        channel = Channel.get(user.channel.channel_id)
+        channel.quit(user.client_id)
         user.channel = None
         User.update(user)
+        logger.debug("QuitChannel end")
 
 
 class UpdateMode(Command):

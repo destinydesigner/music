@@ -25,7 +25,8 @@ class Client(object):
         if self.stream is None:
             self.stream = yield tcpclient.TCPClient().connect(
                 self.host, self.port)
-            client_id = str(uuid.uuid4())
+            # client_id = str(uuid.uuid4())
+            client_id = "sfxxxxxxx"
             yield self.stream.write(
                 json.dumps({
                     "cmd": 1,
