@@ -136,6 +136,13 @@ class Channel(BaseObject):
             import traceback
             print traceback.format_exc()
 
+        logger.debug(
+            "Quit. ClientId: %s, OwnerClientId: %s"
+            " type(ClientId): %s, type(OwnerClientId): %s",
+            client_id, self.owner.client_id,
+            type(client_id), type(self.owner.client_id)
+        )
+
         if client_id == self.owner.client_id:
             try:
                 self.notify_members({
