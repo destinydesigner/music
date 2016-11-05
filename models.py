@@ -138,6 +138,13 @@ class Channel(BaseObject):
 
         if client_id == self.owner.client_id:
             try:
+                self.notify_members({
+                    'cmd': 7,
+                    'channel_id': self.channel_id,
+                    'error': 0,
+                    'message': 'success',
+                })
+                yield gen.sleep(1)
                 del Channel.CHANNEL_POOL[self.channel_id]
             except:
                 import traceback
