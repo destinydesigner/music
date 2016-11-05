@@ -192,6 +192,10 @@ class ChangeSong(Command):
 
         package = SyncPackage(channel=channel)
         channel.notify_members(package.data)
+        self.response.update(package.data)
+        self.response.update({
+            'cmd': self.cmd_id
+        })
 
 
 class RetrieveSongs(Command):
