@@ -177,7 +177,7 @@ class Channel(BaseObject):
 
     def get_song_play_time(self):
         while True:
-            yield int(
+            yield (
                 self.song_play_time
                 + (time.time() * 1000
                    - self.server_start_time)

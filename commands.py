@@ -132,7 +132,7 @@ class TogglePlay(Command):
         # toggle
         user.channel.playing = not user.channel.playing
         if user.channel.playing is True:
-            user.channel.server_start_time = int(time.time() * 1000)
+            user.channel.server_start_time = (time.time() * 1000)
             user.channel.song_play_time = self.request.song_play_time
 
         package = SyncPackage(channel=user.channel)
@@ -186,7 +186,7 @@ class ChangeSong(Command):
         channel = Channel.get(self.request.channel_id)
         channel.now_playing_song_id = self.request.song_id
         channel.song_play_time = self.request.song_play_time
-        channel.server_start_time = int(time.time() * 1000)
+        channel.server_start_time = (time.time() * 1000)
         channel.playing = True
         Channel.update(channel)
 
