@@ -66,6 +66,7 @@ class Channel(BaseObject):
         self.members = {owner.client_id: owner}
         self.song_play_time = song_play_time
         self.playing = True
+        self.current_mode = 1
         self.server_start_time = time.time() * 1000
         self.CHANNEL_POOL[self.channel_id] = self
 
@@ -161,6 +162,7 @@ class Channel(BaseObject):
             'song_play_time': self.get_song_play_time(),
             'playing': self.playing,
             'modes': self.get_modes(),
+            'current_mode': self.current_mode,
         }
 
     def get_modes(self):
@@ -314,7 +316,7 @@ class SyncPackage(BaseObject):
         return {
             'cmd': self.cmd,
             'pattern': self.pattern if self.pattern else None,
-            'current_mode': 1,
+            'current_mode': self.channel.current_mode,
             'song_play_time': self.channel.get_song_play_time(),
             'now_playing_song_id': self.channel.now_playing_song_id,
             'playing': self.channel.playing,

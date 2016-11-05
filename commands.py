@@ -211,8 +211,8 @@ class RetrievePattern(Command):
     cmd_id = 12
 
     def execute(self):
-        pattern = Pattern.get(self.request.mode_id)
         channel = Channel.get(self.request.channel_id)
+        pattern = Pattern.get(channel.current_mode)
         pattern_data = pattern.get_pattern_data(len(channel.members))
 
         self.response.update({
