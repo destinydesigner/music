@@ -220,6 +220,20 @@ class RetrievePattern(Command):
         })
 
 
+class SwitchMode(Command):
+    cmd_id = 13
+
+    def execute(self):
+        channel = Channel.get(self.request.channel_id)
+        if channel.current_mode != self.request.mode_id:
+            channel.current_mode = self.request.mode_id
+            pattern = Pattern.get(channel.current_mode)
+            pattern_data = pattern.get_pattern_data(len(channel.members))
+
+            package = SyncPackage(channel=channel, pattern=pattern_data)
+            channel.push_to_all(package.data, member_index=True)
+
+
 class SynchronizeTime(Command):
     cmd_id = 102
 
@@ -257,6 +271,7 @@ COMMAND_MAP = {
     10: ChangeSong,
     11: RetrieveSongs,
     12: RetrievePattern,
+    13: SwitchMode,
     102: SynchronizeTime,
 }
 
