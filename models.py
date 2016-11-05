@@ -262,7 +262,7 @@ class Pattern(BaseObject):
             raise PatternDoesNotExist
 
     def get_pattern_data(self, number_of_members):
-        get_pattern_data(self.data, number_of_members)
+        return get_pattern_data(self.data, number_of_members)
 
 
 import patterns
